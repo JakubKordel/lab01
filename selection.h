@@ -13,7 +13,7 @@
 using namespace std;
 
 template<typename IteratorType>
-void bubbleSort(IteratorType first, IteratorType last)
+void selectionSort(IteratorType first, IteratorType last)
 {
     IteratorType a = first;
     IteratorType b = first;
