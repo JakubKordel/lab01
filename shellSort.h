@@ -1,7 +1,9 @@
 #include <stdio.h>
+#include <vector>
+#include <cmath>
 
 template <typename IteratorType>
-void shellInsertionSort( IteratorType first, IteratorType last, int n ){
+void shellInsertionSort( IteratorType first, IteratorType last, size_t n ){
 	IteratorType j;
 	for ( auto i = first + n ; i < last ; i += n ){
 		j = i;
@@ -17,12 +19,18 @@ void shellInsertionSort( IteratorType first, IteratorType last, int n ){
 template <typename IteratorType>
 void shellSort(IteratorType first, IteratorType last){
 	size_t size = distance( first, last );
-	size /= 2;
-	while ( size > 1) {
-		shellInsertionSort<IteratorType>( first, last, size );
-		size /= 2;		 
+	std::vector<size_t> jumps;
+	size_t current = 1;
+	int k = 1;
+	while ( current < size ){
+		jumps.push_back(current);
+		current = pow( 2, k ) + 1;
+		++k;
 	}
-	shellInsertionSort<IteratorType>( first, last, 1 );
+
+	for ( size_t i = jumps.size(); i > 0; --i) {
+		shellInsertionSort<IteratorType>( first, last, jumps[i-1] );	 
+	}
 }	
 
 

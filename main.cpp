@@ -17,7 +17,7 @@ int main(){
 	}
 	file.close();
 	std::vector<std::string> dataCopy;
-		for (int i = 1; i < 7; ++i ){
+	for (int i = 1; i < 11; ++i ){
 		dataCopy.assign(data.begin(), data.begin() + i * words );
 		struct tms t1, t2;
 		times(&t1);
@@ -31,7 +31,7 @@ int main(){
 		std::cout << "Sorting time: " << dt << std::endl;
 	}
 
-	for (int i = 1; i < 7; ++i ){
+	for (int i = 1; i < 11; ++i ){
 		dataCopy.assign(data.begin(), data.begin() + i * words );
 		struct tms t1, t2;
 		times(&t1);
