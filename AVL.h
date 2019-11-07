@@ -12,14 +12,146 @@ class AVL{
         int bf;
         int key;
     };
+public:
 
     Node * root;
+    AVL(){
+        root = nullptr;
+    }
 
-    void insert( int k ){
+    ~AVL(){
+        deleteTree(root);
+    }
+
+    void deleteTree(Node * n){
+        if(n){
+            deleteTree(n->left);
+            deleteTree(n->right);
+            delete n;
+        }
+    }
+
+    void add(int k, Data data){
+        insert(k, data);
+    }
+
+    Data getData(int k){
+        Node * n = find(root, k);
+        return n ->data;
+    }
+
+    void del(int k){
+        Node * n = find(root, k);
+        remove(n);
+    }
+
+    Node * remove(Node * x){
+        Node  *t,*y,*z;
+        bool nest;
+
+        if(x->left && x->right){
+            y    = remove(prev(x));
+            nest = false;
+        }
+        else{
+            if(x->left)
+            {
+                y = x->left; x->left = nullptr;
+            }
+            else
+            {
+                y = x->right; x->right = nullptr;
+            }
+            x->bf = 0;
+            nest  = true;
+        }
+
+        if(y){
+            y->parent    = x->parent;
+            y->left  = x->left;  if(y->left)  y->left->parent  = y;
+            y->right = x->right; if(y->right)  y->right->parent = y;
+            y->bf    = x->bf;
+        }
+
+        if(x->parent){
+            if(x->parent->left == x) x->parent->left = y; else x->parent->right = y;
+        }
+        else root = y;
+
+        if(nest){
+            z = y;
+            y = x->parent;
+            while(y){
+                if(!y->bf){
+                    if(y->left == z)  y->bf = -1; else y->bf = 1;
+                    break;
+                }
+                else{
+                    if(((y->bf == 1) && (y->left == z)) || ((y->bf == -1) && (y->right == z))){
+                        y->bf = 0;
+                        z = y; y = y->parent;
+                    }
+                    else{
+                        if(y->left == z)  t = y->right; else t = y->left;
+                        if(!t->bf){
+                            if(y->bf == 1)
+                                LL(y);
+                            else
+                                RR(y);
+                            break;
+                        }
+                        else if(y->bf == t->bf){
+                            if(y->bf == 1)
+                                LL(y);
+                            else
+                                RR(y);
+                            z = t; y = t->parent;
+                        }
+                        else{
+                            if(y->bf == 1)
+                                LR(y);
+                            else
+                                RL(y);
+                            z = y->parent; y = z->parent;
+                        }
+                    }
+                }
+            }
+        }
+        return x;
+    }
+
+    Node * find(Node * p, int k){
+        while(p && p->key != k)
+            p = (k < p->key) ? p->left: p->right;
+        return p;
+    }
+
+    Node * prev(Node * p){
+        Node * r;
+
+        if(p){
+            if(p->left){
+                p = p->left;
+                while(p->right) p = p->right;
+            }
+            else
+                do{
+                    r = p;
+                    p = p->parent;
+                } while(p && p->right != r);
+        }
+        return p;
+    }
+
+private:
+
+    void insert( int k, Data d ){
         Node * w = new Node;
         w ->left = nullptr;
         w ->right = nullptr;
         w ->key = k;
+        w->data = d;
         bool t;
         Node * r;
         w ->bf = 0;
@@ -28,7 +160,7 @@ class AVL{
             root = w;
             return;
         }
-        while (){
+        while ( true ){
             if ( k < p ->key ){
                 if ( p ->left ){
                     p = p ->left;
@@ -72,87 +204,20 @@ class AVL{
             if(t){
                 if(r->bf == 1){
                     if(r->right == p) r->bf = 0;
-                    else if(p->bf == -1) LR(root,r);
-                    else                 LL(root,r);
+                    else if(p->bf == -1)
+                        LR(r);
+                    else
+                        LL(r);
                 }
                 else{
                     if(r->left == p) r->bf = 0;
-                    else if(p->bf == 1) RL(root,r);
-                    else                RR(root,r);
-                }
-            }
-        }
-    }
-
-    Node * remove(Node * x){
-        Node  *t,*y,*z;
-        bool nest;
-
-        if(x->left && x->right)
-        {
-            y    = removeAVL(root,predAVL(x));
-            nest = false;
-        }
-        else
-        {
-            if(x->left)
-            {
-                y = x->left; x->left = nullptr;
-            }
-            else
-            {
-                y = x->right; x->right = nullptr;
-            }
-            x->bf = 0;
-            nest  = true;
-        }
-
-        if(y){
-            y->up    = x->up;
-            y->left  = x->left;  if(y->left)  y->left->up  = y;
-            y->right = x->right; if(y->right)  y->right->up = y;
-            y->bf    = x->bf;
-        }
-
-        if(x->up)
-        {
-            if(x->up->left == x) x->up->left = y; else x->up->right = y;
-        }
-        else root = y;
-
-        if(nest){
-            z = y;
-            y = x->up;
-            while(y){
-                if(!y->bf){
-                    if(y->left == z)  y->bf = -1; else y->bf = 1;
-                    break;
-                }
-                else{
-                    if(((y->bf == 1) && (y->left == z)) || ((y->bf == -1) && (y->right == z))){
-                        y->bf = 0;
-                        z = y; y = y->up;
-                    }
+                    else if(p->bf == 1)
+                        RL(r);
                     else
-                    {
-                        if(y->left == z)  t = y->right; else t = y->left;
-                        if(!t->bf){
-                            if(y->bf == 1) LL(root,y); else RR(root,y);
-                            break;
-                        }
-                        else if(y->bf == t->bf){
-                            if(y->bf == 1) LL(root,y); else RR(root,y);
-                            z = t; y = t->up;
-                        }
-                        else{
-                            if(y->bf == 1) LR(root,y); else RL(root,y);
-                            z = y->up; y = z->up;
-                        }
-                    }
+                        RR(r);
                 }
             }
         }
-        return x;
     }
 
     void RR ( Node * node ) {
