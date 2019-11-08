@@ -45,6 +45,23 @@ class TreeMap
     /*!
      * dodaje wpis do slownika
      */
+    Node* find(key_type& key)
+    {
+        Node* help = this->root;
+    while(help){
+        if(key == help->key){
+            return help;
+
+        }else if(key > help->key){
+            help = help->right;
+        }else if(key < help->key){
+            help = help->left;
+        }
+    }
+    return NULL;
+    }
+
+
     void insert(const key_type& key, const mapped_type &value)
     {
         throw std::runtime_error("TODO: insert");
@@ -73,14 +90,31 @@ class TreeMap
      */
     const mapped_type& value(const key_type& key) const
     {
-        throw std::runtime_error("TODO: value");
+        Node* help;
+        if(contains(key)){
+            help=find(key);
+            return help;
+        }
+        else{
+            return NULL;
+        }
     }
 
     /*!
      * zwraca informacje, czy istnieje w slowniku podany klucz
      */
     bool contains(const key_type& key) const {
-        throw std::runtime_error("TODO: contains");
+        Node* help;
+        help = find(key);
+        if(help){
+            splay(help);
+            return true;
+        }
+        else{
+            return false;
+        }
+
+
     }
 
     void rot_R(Node * & root, Node * A){
