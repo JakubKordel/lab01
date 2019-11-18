@@ -345,14 +345,12 @@ private:
         }
     }
 
-    size_t getfullCount(Node* root) const {
-        if (root == nullptr)
+    size_t getfullCount(Node* r) const {
+        if (r == nullptr)
             return 0;
-        size_t res = 0;
-        if  (root->left && root->right)
-            res++;
-        res += (getfullCount(root->left) +
-                getfullCount(root->right));
+        size_t res = 1;
+        res += (getfullCount(r->left) +
+                getfullCount(r->right));
         return res;
     }
 };
