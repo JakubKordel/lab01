@@ -51,7 +51,6 @@ private:
  * Slownik
  *
  */
-
 template<typename KeyType, typename ValueType>
 class TreeMap{
 
@@ -65,6 +64,7 @@ public:
     ~TreeMap() = default;   // destruktor trywialny
 
 private:
+    int i = 0;
     struct Node {
         Node *up;
         Node *right;
@@ -90,6 +90,14 @@ public:
      * dodaje wpis do slownika
      */
     void insert(const key_type& key, const mapped_type &value){
+        Node* help;
+        if(contains(key)){
+            help = find(key);
+            help->v.first = key;
+            help->v.second = value;
+            return;
+        }
+
         Node * newNode, * it;
         key_type k = key;
         newNode = new Node;
@@ -117,6 +125,7 @@ public:
                     else it = it->right;
                 }
         newNode->up  = it;
+                ++i;
     }
 
     /*!
@@ -124,9 +133,16 @@ public:
      */
     void insert(const value_type &key_value){
         Node * newNode, * it;
+        Node* help;
+        if(contains( key_value.first)){
+           help = find(key_value.first);
+           help->v = key_value;
+            return;
+        }
+
         newNode = new Node;
-        newNode->left = nullptr;
-        newNode->right = nullptr;
+        newNode->left = NULL;
+        newNode->right = NULL;
         newNode->v = key_value;
         it = root;
         if(!it)
@@ -148,6 +164,7 @@ public:
                     else it = it->right;
                 }
         newNode->up  = it;
+                ++i;
     }
 
     /*!
@@ -157,7 +174,13 @@ public:
      */
     mapped_type& operator[](const key_type& key)
     {
-        throw std::runtime_error("TODO: operator[]");
+        if(contains(key)) {
+            return value(key);
+        }
+        else{
+            insert(key, 0);
+            return value(key);
+        }
     }
 
     /*!
@@ -198,9 +221,11 @@ public:
         else{
             return false;
         }
+
+
     }
 
-    mapped_type& value(const key_type& key)
+     mapped_type& value(const key_type& key)
     {
         Node* help;
         if(contains(key)){
@@ -209,6 +234,16 @@ public:
         }
         throw std::runtime_error("There's no member with that key");
     }
+
+    size_t getfullCount(Node* r) const {
+        if (r == nullptr)
+            return 0;
+        size_t res = 1;
+        res += (getfullCount(r->left) +
+                getfullCount(r->right));
+        return res;
+    }
+
 
     /*!
      * zwraca liczbe wpisow w slowniku
@@ -345,14 +380,7 @@ private:
         }
     }
 
-    size_t getfullCount(Node* r) const {
-        if (r == nullptr)
-            return 0;
-        size_t res = 1;
-        res += (getfullCount(r->left) +
-                getfullCount(r->right));
-        return res;
-    }
+
 };
 
 #include "tests.h"
