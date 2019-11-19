@@ -44,9 +44,6 @@ private:
     bool m_print = true;
 };
 
-
-
-
 /*
  * Slownik
  *
@@ -61,7 +58,7 @@ public:
     using value_type = std::pair< const key_type, mapped_type>;
 
     TreeMap() = default;    // konstruktor trywialny
-    ~TreeMap() = default;   // destruktor trywialny
+    ~TreeMap() { deleteTree(root); }   // destruktor trywialny
 
 private:
     struct Node {
@@ -356,6 +353,13 @@ private:
         return res;
     }
 
+    void deleteTree(Node * node){
+        if ( !node ) return;
+        deleteTree(node ->left);
+        deleteTree(node ->right);
+        delete node;
+    }
+
 };
 
 #include "tests.h"
@@ -363,6 +367,7 @@ private:
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <map>
 
 int main()
 {
@@ -377,8 +382,34 @@ int main()
         data.push_back(word);
     }
     file.close();
+    Benchmark<std::chrono::nanoseconds> b;
     for ( size_t i = 0 ; i < data.size() ; ++i ){
         dict.insert(data[i], data[i] + " :Data");
     }
+    size_t elapsed = b.elapsed();
+    std::cout << elapsed << std::endl;
+
+    Benchmark<std::chrono::nanoseconds> b2;
+    for ( size_t i = 0 ; i < data.size() ; ++i ){
+        dict.value(data[i]);
+    }
+    elapsed = b2.elapsed();
+    std::cout << elapsed << std::endl;
+
+    std::map<std::string, std::string> map;
+    Benchmark<std::chrono::nanoseconds> b3;
+    for ( size_t i = 0 ; i < data.size() ; ++i ){
+        map.insert(std::pair<std::string, std::string> (data[i], data[i] + " :Data" ));
+    }
+    elapsed = b3.elapsed();
+    std::cout << elapsed << std::endl;
+
+    Benchmark<std::chrono::nanoseconds> b4;
+    for ( size_t i = 0 ; i < data.size() ; ++i ){
+        map.find(data[i]);
+    }
+    elapsed = b4.elapsed();
+    std::cout << elapsed << std::endl;
+    
     return 0;
 }
