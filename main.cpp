@@ -58,13 +58,12 @@ class TreeMap{
 public:
     using key_type = KeyType;
     using mapped_type = ValueType;
-    using value_type = std::pair< key_type, mapped_type>;
+    using value_type = std::pair< const key_type, mapped_type>;
 
     TreeMap() = default;    // konstruktor trywialny
     ~TreeMap() = default;   // destruktor trywialny
 
 private:
-    int i = 0;
     struct Node {
         Node *up;
         Node *right;
@@ -78,33 +77,23 @@ public:
      * true jezeli slownik jest pusty
      */
     bool isEmpty() const{
-        if(!root){
-            return true;
-        }
-        else{
-            return false;
-        }
+        return !root;
     }
 
     /*!
      * dodaje wpis do slownika
      */
     void insert(const key_type& key, const mapped_type &value){
-        Node* help;
+
         if(contains(key)){
+            Node* help;
             help = find(key);
-            help->v.first = key;
             help->v.second = value;
             return;
         }
 
         Node * newNode, * it;
-        key_type k = key;
-        newNode = new Node;
-        newNode->left = NULL;
-        newNode->right = NULL;
-        newNode-> v.first = k;
-        newNode-> v.second = value;
+        newNode = new Node{nullptr, nullptr, nullptr, std::pair<key_type, mapped_type>(key, value)};
         it = root;
         if(!it)
             root = newNode;
@@ -125,7 +114,6 @@ public:
                     else it = it->right;
                 }
         newNode->up  = it;
-                ++i;
     }
 
     /*!
@@ -135,15 +123,13 @@ public:
         Node * newNode, * it;
         Node* help;
         if(contains( key_value.first)){
-           help = find(key_value.first);
-           help->v = key_value;
+            help = find(key_value.first);
+            help->v.second = key_value.second;
             return;
         }
 
-        newNode = new Node;
-        newNode->left = NULL;
-        newNode->right = NULL;
-        newNode->v = key_value;
+        newNode = new Node{nullptr, nullptr, nullptr, key_value};
+
         it = root;
         if(!it)
             root = newNode;
@@ -164,7 +150,6 @@ public:
                     else it = it->right;
                 }
         newNode->up  = it;
-                ++i;
     }
 
     /*!
@@ -175,75 +160,39 @@ public:
     mapped_type& operator[](const key_type& key)
     {
         if(contains(key)) {
-            return value(key);
-        }
-        else{
-            insert(key, 0);
-            return value(key);
-        }
-    }
-
-    /*!
-  * zwraca wartosc dla podanego klucza
-  */
-
-    Node* find(const key_type& key) const
-    {
-        Node* help = root;
-        while(help){
-            if(key == help->v.first){
-                return help;
-
-            }
-            else if(key > help->v.first){
-                help = help->right;
-            }
-            else if(key < help->v.first){
-                help = help->left;
-            }
-        }
-        return nullptr;
-    }
-
-
-
-    /*!
-     * zwraca informacje, czy istnieje w slowniku podany klucz
-     */
-    bool contains(const key_type& key)
-    {
-        Node* help;
-        help = find(key);
-        if(help!=nullptr){
+            Node * help = find(key);
             splay(help);
-            return true;
+            return value(key);
         }
         else{
-            return false;
+            mapped_type empty;
+            insert(key, empty);
+            return value(key);
         }
-
-
     }
 
-     mapped_type& value(const key_type& key)
+    /*!
+     * zwraca wartosc dla podanego klucza
+     */
+    mapped_type& value(const key_type& key)
     {
         Node* help;
         if(contains(key)){
             help=find(key);
+            splay( help );
             return help->v.second;
         }
         throw std::runtime_error("There's no member with that key");
     }
 
-    size_t getfullCount(Node* r) const {
-        if (r == nullptr)
-            return 0;
-        size_t res = 1;
-        res += (getfullCount(r->left) +
-                getfullCount(r->right));
-        return res;
+    /*!
+     * zwraca informacje, czy istnieje w slowniku podany klucz
+     */
+    bool contains(const key_type& key) const
+    {
+        Node* help = find(key);
+        return help;
     }
-
 
     /*!
      * zwraca liczbe wpisow w slowniku
@@ -252,8 +201,9 @@ public:
         return getfullCount(root);
     }
 
+
 private:
-    void rot_R( Node * & root, Node * A)
+    void rot_R( Node * A)
     {
         Node * B = A->left;
         Node* p = A->up;
@@ -287,7 +237,7 @@ private:
         }
     }
 
-    void rot_L(Node * & root, Node* A)
+    void rot_L( Node* A)
     {
         Node * B = A->right;
         Node * p = A->up;
@@ -344,50 +294,91 @@ private:
 
                 if(!x->up->up){
                     if(x->up->left == x) {
-                        rot_R(root,x->up);
+                        rot_R(x->up);
                     }
                     else{
-                        rot_L(root,x->up);
+                        rot_L(x->up);
                     }
                     break;
                 }
 
                 if((x->up->up->left == x->up) && (x->up->left == x)){
 
-                    rot_R(root,x->up->up);
-                    rot_R(root,x->up);
+                    rot_R(x->up->up);
+                    rot_R(x->up);
                     continue;
                 }
 
                 if((x->up->up->right == x->up) && (x->up->right == x)){
 
-                    rot_L(root,x->up->up);
-                    rot_L(root,x->up);
+                    rot_L(x->up->up);
+                    rot_L(x->up);
                     continue;
                 }
 
                 if(x->up->right == x){
 
-                    rot_L(root,x->up);
-                    rot_R(root,x->up);
+                    rot_L(x->up);
+                    rot_R(x->up);
                 }
                 else{
 
-                    rot_R(root,x->up);
-                    rot_L(root,x->up);
+                    rot_R(x->up);
+                    rot_L(x->up);
                 }
             }
         }
     }
 
+    Node* find(const key_type& key) const {
+        Node* help = root;
+        while(help){
+            if(key == help->v.first){
+                return help;
+
+            }
+            else if(key > help->v.first){
+                help = help->right;
+            }
+            else if(key < help->v.first){
+                help = help->left;
+            }
+        }
+        return nullptr;
+    }
+
+    size_t getfullCount(Node* r) const {
+        if (r == nullptr)
+            return 0;
+        size_t res = 1;
+        res += (getfullCount(r->left) +
+                getfullCount(r->right));
+        return res;
+    }
 
 };
 
 #include "tests.h"
+#include <vector>
+#include <iostream>
+#include <fstream>
+#include <string>
 
 int main()
 {
     unit_test();
-
+    std::vector<std::string> data;
+    std::ifstream file;
+    std::string word;
+    TreeMap<std::string, std::string> dict;
+    file.open("text");
+    while (file.good()){
+        file >> word;
+        data.push_back(word);
+    }
+    file.close();
+    for ( size_t i = 0 ; i < data.size() ; ++i ){
+        dict.insert(data[i], data[i] + " :Data");
+    }
     return 0;
 }
