@@ -81,49 +81,21 @@ public:
      * dodaje wpis do slownika
      */
     void insert(const key_type& key, const mapped_type &value){
-
-        if(contains(key)){
-            Node* help;
-            help = find(key);
-            help->v.second = value;
-            return;
-        }
-
-        Node * newNode, * it;
-        newNode = new Node{nullptr, nullptr, nullptr, std::pair<key_type, mapped_type>(key, value)};
-        it = root;
-        if(!it)
-            root = newNode;
-        else
-            while(true)
-                if(key < it->v.first){
-                    if(!it->left){
-                        it->left = newNode;
-                        break;
-                    }
-                    else it = it->left;
-                }
-                else{
-                    if(!it->right){
-                        it->right = newNode;
-                        break;
-                    }
-                    else it = it->right;
-                }
-        newNode->up  = it;
+        insert(value_type(key, value));
     }
 
     /*!
      * dodaje wpis do slownika przez podanie pary klucz-wartosc
      */
     void insert(const value_type &key_value){
-        Node * newNode, * it;
-        Node* help;
+
         if(contains( key_value.first)){
+            Node* help;
             help = find(key_value.first);
             help->v.second = key_value.second;
             return;
         }
+        Node * newNode, * it;
 
         newNode = new Node{nullptr, nullptr, nullptr, key_value};
 
@@ -159,7 +131,7 @@ public:
         if(contains(key)) {
             Node * help = find(key);
             splay(help);
-            return value(key);
+            return help ->v.second;
         }
         else{
             mapped_type empty;
@@ -173,8 +145,8 @@ public:
      */
     mapped_type& value(const key_type& key)
     {
-        Node* help;
         if(contains(key)){
+            Node* help;
             help=find(key);
             splay( help );
             return help->v.second;
@@ -332,7 +304,6 @@ private:
         while(help){
             if(key == help->v.first){
                 return help;
-
             }
             else if(key > help->v.first){
                 help = help->right;
@@ -410,6 +381,6 @@ int main()
     }
     elapsed = b4.elapsed();
     std::cout << elapsed << std::endl;
-    
+
     return 0;
 }
