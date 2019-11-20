@@ -90,8 +90,7 @@ public:
     void insert(const value_type &key_value){
 
         if(contains( key_value.first)){
-            Node* help;
-            help = find(key_value.first);
+            Node* help = find(key_value.first);
             help->v.second = key_value.second;
             return;
         }
@@ -146,8 +145,7 @@ public:
     mapped_type& value(const key_type& key)
     {
         if(contains(key)){
-            Node* help;
-            help=find(key);
+            Node* help = find(key);
             splay( help );
             return help->v.second;
         }
