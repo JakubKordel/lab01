@@ -328,7 +328,6 @@ private:
         deleteTree(node ->right);
         delete node;
     }
-
 };
 
 #include "tests.h"
@@ -344,41 +343,69 @@ int main()
     std::vector<std::string> data;
     std::ifstream file;
     std::string word;
-    TreeMap<std::string, std::string> dict;
     file.open("text");
     while (file.good()){
         file >> word;
         data.push_back(word);
     }
     file.close();
-    Benchmark<std::chrono::nanoseconds> b;
-    for ( size_t i = 0 ; i < data.size() ; ++i ){
-        dict.insert(data[i], data[i] + " :Data");
-    }
-    size_t elapsed = b.elapsed();
-    std::cout << elapsed << std::endl;
+    const size_t n = 5000;
 
-    Benchmark<std::chrono::nanoseconds> b2;
-    for ( size_t i = 0 ; i < data.size() ; ++i ){
-        dict.value(data[i]);
-    }
-    elapsed = b2.elapsed();
-    std::cout << elapsed << std::endl;
+    for ( int j = 1; j <= 5; ++j ){
+        std::map<std::string, std::string> dict;
+        for ( size_t i = 0 ; dict.size() < j * n ; ++i ) {
+            dict.insert(std::pair<std::string, std::string>(data[i], data[i] + " :Data"));
+        }
+        size_t total1 = 0;
+        size_t searchTime;
 
-    std::map<std::string, std::string> map;
-    Benchmark<std::chrono::nanoseconds> b3;
-    for ( size_t i = 0 ; i < data.size() ; ++i ){
-        map.insert(std::pair<std::string, std::string> (data[i], data[i] + " :Data" ));
+        for (char i  = 'A'; i <= 'z'; ++i ) {
+            std::string key;
+            key.push_back(i);
+            Benchmark<std::chrono::nanoseconds> b;
+            dict.insert(std::pair<std::string, std::string>(key + "zzZzz", "Test"));
+            total1 += b.elapsed();
+        }
+        total1 /= ('z'+1-'A');
+        Benchmark<std::chrono::nanoseconds> b;
+        dict.find("ochraniasz");
+        dict.find("pieszo");
+        dict.find("czyli");
+        dict.find("jego");
+        dict.find("zajazd");
+        searchTime = b.elapsed()/5;
+        std::cout << std::endl << "std::map | Czas wstawienia dla " << j*n << " słów w słowniku: " << total1;
+        std::cout << std::endl << "std::map | Czas znalezienia elementu: " << searchTime << std::endl;
     }
-    elapsed = b3.elapsed();
-    std::cout << elapsed << std::endl;
 
-    Benchmark<std::chrono::nanoseconds> b4;
-    for ( size_t i = 0 ; i < data.size() ; ++i ){
-        map.find(data[i]);
+    for ( int j = 1; j <= 5; ++j ){
+        TreeMap<std::string, std::string> dict;
+        for ( size_t i = 0 ; dict.size() < j * n ; ++i ) {
+            dict.insert(data[i], data[i] + " :Data");
+        }
+        size_t total1 = 0;
+        size_t searchTime;
+
+        for (char i  = 'A'; i <= 'z'; ++i ) {
+            std::string key;
+            key.push_back(i);
+            Benchmark<std::chrono::nanoseconds> b;
+            dict.insert(std::pair<std::string, std::string>(key + "zzZzz", "Test"));
+            total1 += b.elapsed();
+        }
+        total1 /= ('z'+1-'A');
+
+        Benchmark<std::chrono::nanoseconds> b;
+        dict.value("ochraniasz");
+        dict.value("pieszo");
+        dict.value("czyli");
+        dict.value("jego");
+        dict.value("zajazd");
+        searchTime = b.elapsed()/5;
+
+        std::cout << std::endl << "Splay | Czas wstawienia dla " << j*n << " słów w słowniku: " << total1;
+        std::cout << std::endl << "Splay | Czas znalezienia elementu: " << searchTime << std::endl;
     }
-    elapsed = b4.elapsed();
-    std::cout << elapsed << std::endl;
 
     return 0;
 }
